@@ -1,9 +1,8 @@
 # flow.py
 from pocketflow import Flow
-# Import all necessary nodes for the complete flow, including the new report generation node
 from nodes import ResumeInputNode, URLExtractionNode, GitHubAnalyzerNode, LLMSummarizerNode, \
                     ContributionNode, OriginalityNode, TrustHeuristicNode, \
-                    CandidateAggregationNode, EloRankingNode, ReportGenerationNode # NEW Node
+                    CandidateAggregationNode, EloRankingNode, ReportGenerationNode
 
 def create_codecredx_flow():
     """
@@ -12,8 +11,9 @@ def create_codecredx_flow():
     generates LLM summaries, assigns simulated contribution, originality,
     and trust scores, aggregates these scores, assigns a simulated Elo ranking,
     and finally generates a comprehensive candidate report.
+    Error handling for various edge cases is integrated into each node.
     """
-    print("Creating CodeCredX flow...") # Keep this top-level print for immediate feedback
+    print("Creating CodeCredX flow...")
 
     # Initialize all nodes in the pipeline
     resume_input_node = ResumeInputNode()
@@ -25,10 +25,9 @@ def create_codecredx_flow():
     trust_heuristic_node = TrustHeuristicNode()
     candidate_aggregation_node = CandidateAggregationNode()
     elo_ranking_node = EloRankingNode()
-    report_generation_node = ReportGenerationNode() # NEW: Report Generation Node
+    report_generation_node = ReportGenerationNode()
 
     # Define the sequence of nodes
-    # ... -> CandidateAggregation -> EloRanking -> ReportGeneration
     resume_input_node >> url_extraction_node
     url_extraction_node >> github_analyzer_node
     github_analyzer_node >> llm_summarizer_node
@@ -37,10 +36,10 @@ def create_codecredx_flow():
     originality_node >> trust_heuristic_node
     trust_heuristic_node >> candidate_aggregation_node
     candidate_aggregation_node >> elo_ranking_node
-    elo_ranking_node >> report_generation_node # Chain the new report generation node
+    elo_ranking_node >> report_generation_node
 
     # The flow starts with the ResumeInputNode
-    # This now covers Phase 0, Phase 1, Phase 2, Phase 3, Phase 4, and Phase 5.
+    # This now effectively covers all core phases including integrated edge case handling.
     return Flow(start=resume_input_node)
 
 # Create an instance of the flow for direct import if needed

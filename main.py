@@ -4,7 +4,7 @@ import sys
 import os
 import json
 from flow import create_codecredx_flow
-from config import app_config # Import centralized configuration
+from config import app_config
 
 def setup_logging():
     """
@@ -18,53 +18,55 @@ def setup_logging():
 
     log_file_path = os.path.join(log_dir, app_config.LOG_FILE)
 
-    # Basic configuration for the root logger
     logging.basicConfig(
         level=app_config.LOG_LEVEL,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         handlers=[
-            logging.FileHandler(log_file_path),  # Log to file
-            logging.StreamHandler(sys.stdout)   # Log to console
+            logging.FileHandler(log_file_path),
+            logging.StreamHandler(sys.stdout)
         ]
     )
-    # Suppress informational logs from the 'requests' library if desired
     logging.getLogger("requests").setLevel(logging.WARNING)
     logging.getLogger("urllib3").setLevel(logging.WARNING)
-    logging.getLogger("openai").setLevel(logging.WARNING) # Suppress detailed OpenAI logs if not needed at INFO level
-
+    logging.getLogger("openai").setLevel(logging.WARNING)
 
     logger = logging.getLogger(__name__)
     logger.info(f"Logging configured. Log level: {app_config.LOG_LEVEL}, Log file: {log_file_path}")
     return logger
 
+
 def main():
-    """
-    Main function to run the CodeCredX application.
-    It initializes the flow, runs it, and prints the results using logging.
-    """
-    logger = setup_logging() # Setup logging at the very beginning
+    logger = setup_logging()
 
     logger.info("Starting CodeCredX application...")
 
-    # Initialize a shared dictionary.
+    # Determine the resume file path from command-line arguments
+    resume_file_path = None
+    if len(sys.argv) > 1:
+        resume_file_path = sys.argv[1]
+        logger.info(f"Resume file path provided via command line: {resume_file_path}")
+    else:
+        logger.warning("No resume file path provided via command line. The ResumeInputNode will use its default simulated content.")
+
     shared = {
         "resume_text": None,
         "github_project_urls": [],
         "other_urls": [],
         "analyzed_github_projects": [],
         "overall_candidate_metrics": {},
-        "candidate_report": None # NEW: To store the generated report content
+        "candidate_report": None,
+        "resume_file_path": resume_file_path # NEW: Add file_path to shared dictionary
     }
 
     logger.debug(f"Initial shared dictionary ID: {id(shared)}")
     logger.debug(f"Initial shared dictionary content:\n{json.dumps(shared, indent=2)}")
 
-    # Create the CodeCredX flow
     codecredx_flow = create_codecredx_flow()
 
-    # Run the flow with the shared dictionary
     logger.info("\n--- Running CodeCredX Flow ---")
     try:
+        # Now call flow.run without the file_path keyword argument.
+        # ResumeInputNode will pick it up from 'shared'.
         codecredx_flow.run(shared)
         logger.info("Flow.run completed. 'shared' dictionary was modified in-place.")
 
@@ -72,8 +74,6 @@ def main():
         logger.critical(f"An unhandled exception occurred during flow execution: {e}", exc_info=True)
         logger.error("Flow terminated prematurely.")
 
-
-    # --- Log the final results from the shared dictionary ---
     logger.info("\n--- CodeCredX Flow Execution Complete ---")
     logger.debug(f"Final shared dictionary ID: {id(shared)}")
 
@@ -109,8 +109,8 @@ def main():
             else:
                 logger.info("  README Content: Not available or failed to fetch.")
             logger.info(f"  LLM Summary: {project.get('summary')}")
-            logger.info("  Scores:")
-            if project.get("scores"):
+            logger.info("  Scores:") # This line is correctly indented
+            if project.get("scores"): # This line was incorrectly indented
                 for score_name, score_value in project["scores"].items():
                     logger.info(f"    {score_name}: {score_value}")
             else:
@@ -118,7 +118,6 @@ def main():
     else:
         logger.info("No GitHub projects analyzed.")
 
-    # Print overall candidate metrics, including the Elo score
     logger.info("\n--- Overall Candidate Metrics ---")
     if shared.get("overall_candidate_metrics"):
         for metric_name, metric_value in shared["overall_candidate_metrics"].items():
@@ -126,15 +125,11 @@ def main():
     else:
         logger.info("No overall candidate metrics found.")
 
-    # NEW: Print generated report details
     logger.info("\n--- Candidate Report Status ---")
     if shared.get("candidate_report"):
         logger.info("Candidate report generated and saved to 'logs/candidate_report.md'.")
-        # Optionally, print a snippet of the report to console
-        # logger.info("\n--- Report Snippet ---\n" + shared["candidate_report"][:500] + "\n...")
     else:
         logger.warning("Candidate report was not generated.")
-
 
     logger.debug("\n--- Full Shared Dictionary State After Flow ---")
     logger.debug(json.dumps(shared, indent=2))
