@@ -467,3 +467,95 @@ class EloRankingNode(Node):
         shared["overall_candidate_metrics"] = exec_res
         logger.info("Simulated Elo score assigned and stored.")
         return "default"
+
+# NEW: Node to generate a final report in Markdown format.
+class ReportGenerationNode(Node):
+    def prep(self, shared: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Retrieves all relevant data for the report from the shared store.
+        """
+        return {
+            "resume_text": shared.get("resume_text", "N/A"),
+            "github_project_urls": shared.get("github_project_urls", []),
+            "other_urls": shared.get("other_urls", []),
+            "analyzed_github_projects": shared.get("analyzed_github_projects", []),
+            "overall_candidate_metrics": shared.get("overall_candidate_metrics", {})
+        }
+
+    def exec(self, report_data: Dict[str, Any]) -> str:
+        """
+        Generates a comprehensive Markdown report based on the processed data.
+        """
+        logger.info("Generating candidate report...")
+        report_content = []
+
+        report_content.append("# CodeCredX Candidate Report\n")
+        report_content.append("---\n")
+
+        # Candidate Overview
+        report_content.append("## Candidate Overview\n")
+        report_content.append(f"**Overall Score:** {report_data['overall_candidate_metrics'].get('overall_candidate_score', 'N/A')}\n")
+        report_content.append(f"**Simulated Elo Rating:** {report_data['overall_candidate_metrics'].get('elo_score', 'N/A')}\n")
+        report_content.append(f"**Number of Successful Projects Analyzed:** {report_data['overall_candidate_metrics'].get('num_successful_projects', 'N/A')}\n")
+        report_content.append(f"**Resume Snippet:**\n```\n{report_data['resume_text'][:200]}...\n```\n") # Show first 200 chars
+
+        # Extracted URLs
+        report_content.append("## Extracted URLs\n")
+        report_content.append("### GitHub Project URLs:\n")
+        if report_data['github_project_urls']:
+            for url in report_data['github_project_urls']:
+                report_content.append(f"- {url}\n")
+        else:
+            report_content.append("No GitHub project URLs found in resume.\n")
+
+        report_content.append("\n### Other URLs:\n")
+        if report_data['other_urls']:
+            for url in report_data['other_urls']:
+                report_content.append(f"- {url}\n")
+        else:
+            report_content.append("No other URLs found in resume.\n")
+
+        # Analyzed Projects
+        report_content.append("\n## Analyzed Projects\n")
+        if report_data['analyzed_github_projects']:
+            for project in report_data['analyzed_github_projects']:
+                report_content.append(f"### [{project['repo_name']}]({project['url']})\n")
+                report_content.append(f"- **Status:** {project['status']}\n")
+                if project.get('error'):
+                    report_content.append(f"- **Error:** {project['error']}\n")
+                report_content.append("- **Metadata:**\n")
+                for key, value in project['metadata'].items():
+                    report_content.append(f"  - {key}: {value}\n")
+                if project.get('summary'):
+                    report_content.append(f"- **LLM Summary:** {project['summary']}\n")
+                else:
+                    report_content.append("- **LLM Summary:** Not available.\n")
+                if project.get('scores'):
+                    report_content.append("- **Scores:**\n")
+                    for score_name, score_value in project['scores'].items():
+                        report_content.append(f"  - {score_name}: {score_value}\n")
+                else:
+                    report_content.append("- **Scores:** Not assigned.\n")
+                report_content.append("\n") # Add a newline for separation
+        else:
+            report_content.append("No GitHub projects were successfully analyzed.\n")
+
+        full_report_content = "".join(report_content)
+        logger.info("Candidate report generated successfully.")
+        return full_report_content
+
+    def post(self, shared: Dict[str, Any], prep_res: Dict[str, Any], exec_res: str) -> str:
+        """
+        Stores the generated report content in the shared store.
+        Optionally, saves it to a file.
+        """
+        shared["candidate_report"] = exec_res
+        report_filename = "logs/candidate_report.md" # Save to logs directory
+        try:
+            with open(report_filename, "w", encoding="utf-8") as f:
+                f.write(exec_res)
+            logger.info(f"Candidate report saved to {report_filename}")
+        except IOError as e:
+            logger.error(f"Failed to save report to file {report_filename}: {e}")
+
+        return "default"

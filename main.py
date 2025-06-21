@@ -52,7 +52,8 @@ def main():
         "github_project_urls": [],
         "other_urls": [],
         "analyzed_github_projects": [],
-        "overall_candidate_metrics": {}
+        "overall_candidate_metrics": {},
+        "candidate_report": None # NEW: To store the generated report content
     }
 
     logger.debug(f"Initial shared dictionary ID: {id(shared)}")
@@ -124,6 +125,16 @@ def main():
             logger.info(f"  {metric_name}: {metric_value}")
     else:
         logger.info("No overall candidate metrics found.")
+
+    # NEW: Print generated report details
+    logger.info("\n--- Candidate Report Status ---")
+    if shared.get("candidate_report"):
+        logger.info("Candidate report generated and saved to 'logs/candidate_report.md'.")
+        # Optionally, print a snippet of the report to console
+        # logger.info("\n--- Report Snippet ---\n" + shared["candidate_report"][:500] + "\n...")
+    else:
+        logger.warning("Candidate report was not generated.")
+
 
     logger.debug("\n--- Full Shared Dictionary State After Flow ---")
     logger.debug(json.dumps(shared, indent=2))
