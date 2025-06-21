@@ -10,6 +10,7 @@ build/
 out/
 *.pyc
 __pycache__/
+llm_cache.json
 
 # Environment files
 .env

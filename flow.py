@@ -1,16 +1,10 @@
 from pocketflow import Flow
-from nodes import GetQuestionNode, AnswerNode
+from nodes import ExtractLinksNode, GitHubAnalyzerNode
 
-def create_qa_flow():
-    """Create and return a question-answering flow."""
-    # Create nodes
-    get_question_node = GetQuestionNode()
-    answer_node = AnswerNode()
-    
-    # Connect nodes in sequence
-    get_question_node >> answer_node
-    
-    # Create flow starting with input node
-    return Flow(start=get_question_node)
+def create_flow():
+    extract_node = ExtractLinksNode()
+    analyzer_node = GitHubAnalyzerNode()
 
-qa_flow = create_qa_flow()
+    extract_node >> analyzer_node  # Chain: extract → analyze
+
+    return Flow(start=extract_node)
