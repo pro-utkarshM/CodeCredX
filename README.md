@@ -1,6 +1,6 @@
-# SkillProof – Multi-Agentic Resume Intelligence System
+# CodeCredX – Multi-Agentic Resume Intelligence System
 
-SkillProof is a multi-agent system designed to evaluate candidates based on real contributions to code, not resume keywords. By crawling and analyzing all project-related URLs (such as GitHub, portfolios, blogs, or demos), it generates structured, verifiable proof-of-work reports and ranks candidates using an Elo-based system. This approach aims to replace traditional Applicant Tracking Systems (ATS) with a trustable, objective, and role-specific ranking mechanism.
+CodeCredX is a multi-agent system designed to evaluate candidates based on real contributions to code, not resume keywords. By crawling and analyzing all project-related URLs (such as GitHub, portfolios, blogs, or demos), it generates structured, verifiable proof-of-work reports and ranks candidates using an Elo-based system. This approach aims to replace traditional Applicant Tracking Systems (ATS) with a trustable, objective, and role-specific ranking mechanism.
 
 ---
 
@@ -20,9 +20,9 @@ SkillProof is a multi-agent system designed to evaluate candidates based on real
 
 ---
 
-## Why SkillProof
+## Why CodeCredX
 
-Most ATS platforms are built to filter resumes using keyword density and formatting. These are easily gamed and often fail to reflect actual ability or work quality. SkillProof is designed for hiring teams that want to:
+Most ATS platforms are built to filter resumes using keyword density and formatting. These are easily gamed and often fail to reflect actual ability or work quality. CodeCredX is designed for hiring teams that want to:
 
 - Hire based on verified code contributions, not self-reported claims
 - Automatically differentiate between original builders and template copiers
@@ -100,7 +100,7 @@ Each project is scored on a 0–100 scale based on:
 
 ## Edge Case Handling
 
-SkillProof is designed to handle common resume inflation techniques and irregularities:
+CodeCredX is designed to handle common resume inflation techniques and irregularities:
 
 * Forked projects with minimal change are penalized
 * Copied templates are detected through similarity matching
@@ -112,7 +112,7 @@ SkillProof is designed to handle common resume inflation techniques and irregula
 
 ## Scaling to 500+ Candidates
 
-SkillProof supports large applicant pools using:
+CodeCredX supports large applicant pools using:
 
 * Sampling-based pairwise Elo updates
 * Resume-level processing depth (0, 1, 2+)
@@ -132,8 +132,8 @@ SkillProof supports large applicant pools using:
 ### Installation
 
 ```bash
-git clone https://github.com/your-username/skillproof
-cd skillproof
+git clone https://github.com/your-username/CodeCredX
+cd CodeCredX
 pip install -e .
 ```
 
