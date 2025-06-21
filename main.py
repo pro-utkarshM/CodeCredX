@@ -52,7 +52,7 @@ def main():
         "github_project_urls": [],
         "other_urls": [],
         "analyzed_github_projects": [],
-        "overall_candidate_metrics": {} # NEW: To store aggregated candidate scores
+        "overall_candidate_metrics": {}
     }
 
     logger.debug(f"Initial shared dictionary ID: {id(shared)}")
@@ -117,7 +117,7 @@ def main():
     else:
         logger.info("No GitHub projects analyzed.")
 
-    # NEW: Print overall candidate metrics
+    # Print overall candidate metrics, including the Elo score
     logger.info("\n--- Overall Candidate Metrics ---")
     if shared.get("overall_candidate_metrics"):
         for metric_name, metric_value in shared["overall_candidate_metrics"].items():

@@ -421,3 +421,49 @@ class CandidateAggregationNode(Node):
         shared["overall_candidate_metrics"] = exec_res
         logger.info("Overall candidate scores aggregated and stored.")
         return "default"
+
+# NEW: Node to assign a simulated Elo score to the candidate.
+class EloRankingNode(Node):
+    def prep(self, shared: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Retrieves the overall candidate metrics from the shared store.
+        """
+        return shared.get("overall_candidate_metrics", {})
+
+    def exec(self, candidate_metrics: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Simulated Elo score calculation.
+        In a real system, this would involve:
+        1. Fetching the candidate's current Elo from a persistent store.
+        2. Simulating pairwise comparisons against other candidates.
+        3. Dynamically adjusting the Elo score based on comparison outcomes.
+        4. Storing the updated Elo score back into the persistent store.
+
+        For this simulation, we'll convert the overall_candidate_score to an Elo-like scale.
+        A typical Elo scale ranges from ~400 (beginner) to ~2400+ (grandmaster).
+        We'll map our 0-100 score to a range like 800-2000.
+        """
+        logger.info("Calculating simulated Elo score for candidate...")
+        overall_score = candidate_metrics.get("overall_candidate_score", 0.0)
+
+        # Map 0-100 score to an Elo range (e.g., 800 to 2000)
+        min_elo = 800
+        max_elo = 2000
+        elo_score = min_elo + (overall_score / 100) * (max_elo - min_elo)
+        elo_score = round(elo_score, 2)
+
+        candidate_metrics["elo_score"] = elo_score
+        logger.info(f"Simulated Elo Score: {elo_score}")
+
+        # Placeholder for future role-specific ranking pools
+        candidate_metrics["role_ranking_pool"] = "General"
+
+        return candidate_metrics
+
+    def post(self, shared: Dict[str, Any], prep_res: Dict[str, Any], exec_res: Dict[str, Any]) -> str:
+        """
+        Stores the updated overall candidate metrics including the Elo score.
+        """
+        shared["overall_candidate_metrics"] = exec_res
+        logger.info("Simulated Elo score assigned and stored.")
+        return "default"
