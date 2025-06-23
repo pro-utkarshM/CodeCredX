@@ -121,34 +121,34 @@ CodeCredX supports large applicant pools using:
 
 ---
 
-<!-- ## Setup and Usage
-
-### Requirements
-
-* Python 3.8+
-* Git, pip, and optionally Poetry
-* HuggingFace Transformers, PyDriller, GitPython
+## Setup and Usage
 
 ### Installation
 
 ```bash
-git clone https://github.com/your-username/CodeCredX
+git clone https://github.com/pro-utkarshM/CodeCredX
 cd CodeCredX
-pip install -e .
+pip install -r requirements.txt
 ```
+Set up LLM in [`utils/call_llm.py`](./utils/call_llm.py) by providing credentials. By default, you can use the [AI Studio key](https://aistudio.google.com/app/apikey) with this client for Gemini Pro 2.5:
 
+   ```python
+   client = genai.Client(
+     api_key=os.getenv("GEMINI_API_KEY", "your-api_key"),
+   )
+   ```
+
+   You can use your own models. We highly recommend the latest models with thinking capabilities (Claude 3.7 with thinking, O1). You can verify that it is correctly set up by running:
+   ```bash
+   python utils/call_llm.py
+   ```
 ### Run (Single Candidate)
 
 ```bash
-python main.py --resume resume.pdf --email user@example.com
+python3 main.py /path/to/resume.pdf
 ```
 
-### Outputs
-
-* `trust_report.json`: Project analysis per candidate
-* `ranked_candidates.csv`: Elo-sorted leaderboard
-
---- -->
+---
 
 ## Roadmap
 
@@ -167,11 +167,6 @@ Contributions are welcome. Please open an issue to discuss your idea first, or s
 
 ---
 
-## License
-
-This project is open-sourced under the MIT License.
-
----
 
 ## Maintainer
 
