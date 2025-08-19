@@ -3,6 +3,7 @@ import logging
 import sys
 import os
 import json
+import argparse
 from flow import create_codecredx_flow
 from config import app_config
 
@@ -40,22 +41,33 @@ def main():
 
     logger.info("Starting CodeCredX application...")
 
-    # Determine the resume file path from command-line arguments
-    resume_file_path = None
-    if len(sys.argv) > 1:
-        resume_file_path = sys.argv[1]
-        logger.info(f"Resume file path provided via command line: {resume_file_path}")
-    else:
-        logger.warning("No resume file path provided via command line. The ResumeInputNode will use its default simulated content.")
+    # --- NEW: Argument Parsing ---
+    parser = argparse.ArgumentParser(description="CodeCredX: Analyze candidate code contributions.")
+    parser.add_argument("--resume", type=str, help="Path to the candidate's resume file (e.g., /path/to/resume.pdf).")
+    parser.add_argument("--profile", type=str, help="URL of the candidate's GitHub profile (e.g., https://github.com/username).")
+    args = parser.parse_args()
+
+    resume_file_path = args.resume
+    github_profile_url = args.profile
+
+    if not resume_file_path and not github_profile_url:
+        logger.warning("No resume file or GitHub profile provided. The application will use default simulated resume content.")
+        
+    if resume_file_path:
+        logger.info(f"Resume file path provided: {resume_file_path}")
+    if github_profile_url:
+        logger.info(f"GitHub profile URL provided: {github_profile_url}")
+    # --- END: Argument Parsing ---
 
     shared = {
         "resume_text": None,
-        "github_project_urls": [],
+        "github_project_urls": [], # This will be the final consolidated list
         "other_urls": [],
         "analyzed_github_projects": [],
         "overall_candidate_metrics": {},
         "candidate_report": None,
-        "resume_file_path": resume_file_path # NEW: Add file_path to shared dictionary
+        "resume_file_path": resume_file_path,
+        "github_profile_url": github_profile_url # NEW: Add profile url to shared
     }
 
     logger.debug(f"Initial shared dictionary ID: {id(shared)}")
@@ -65,8 +77,7 @@ def main():
 
     logger.info("\n--- Running CodeCredX Flow ---")
     try:
-        # Now call flow.run without the file_path keyword argument.
-        # ResumeInputNode will pick it up from 'shared'.
+        # The flow will now internally handle fetching from resume and/or profile URL
         codecredx_flow.run(shared)
         logger.info("Flow.run completed. 'shared' dictionary was modified in-place.")
 
@@ -109,8 +120,8 @@ def main():
             else:
                 logger.info("  README Content: Not available or failed to fetch.")
             logger.info(f"  LLM Summary: {project.get('summary')}")
-            logger.info("  Scores:") # This line is correctly indented
-            if project.get("scores"): # This line was incorrectly indented
+            logger.info("  Scores:")
+            if project.get("scores"):
                 for score_name, score_value in project["scores"].items():
                     logger.info(f"    {score_name}: {score_value}")
             else:

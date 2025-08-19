@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3>Candidate Leaderboard</h3>
+    </div>
+    <div class="card-body">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">Rank</th>
+                    <th scope="col">GitHub Username</th>
+                    <th scope="col">Overall Score</th>
+                    <th scope="col">Elo Score</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for candidate in candidates %}
+                <tr>
+                    <th scope="row">{{ loop.index }}</th>
+                    <td>{{ candidate.github_username }}</td>
+                    <td>{{ "%.2f"|format(candidate.overall_score) }}</td>
+                    <td>{{ "%.2f"|format(candidate.elo_score) }}</td>
+                    <td>
+                        <a href="{{ url_for('report', candidate_id=candidate.id) }}" class="btn btn-sm btn-outline-secondary">View Report</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center">No candidates have been analyzed yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

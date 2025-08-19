@@ -1,23 +1,26 @@
 # flow.py
 from pocketflow import Flow
-from nodes import ResumeInputNode, URLExtractionNode, GitHubAnalyzerNode, LLMSummarizerNode, \
-                    ContributionNode, OriginalityNode, TrustHeuristicNode, \
-                    CandidateAggregationNode, EloRankingNode, ReportGenerationNode
+from nodes import (ResumeInputNode, URLExtractionNode, GitHubAnalyzerNode, 
+                     LLMSummarizerNode, ContributionNode, OriginalityNode, 
+                     TrustHeuristicNode, CandidateAggregationNode, EloRankingNode, 
+                     ReportGenerationNode, GitHubProfileFetcherNode, URLConsolidatorNode)
 
 def create_codecredx_flow():
     """
     Creates and returns the CodeCredX flow.
-    This flow processes a resume, extracts GitHub URLs, analyzes repositories,
-    generates LLM summaries, assigns simulated contribution, originality,
-    and trust scores, aggregates these scores, assigns a simulated Elo ranking,
-    and finally generates a comprehensive candidate report.
-    Error handling for various edge cases is integrated into each node.
+    This flow processes inputs from a resume file and/or a GitHub profile URL.
+    It extracts and consolidates GitHub repository URLs from both sources.
+    Then, it analyzes repositories, generates LLM summaries, assigns simulated scores,
+    aggregates these scores, assigns a simulated Elo ranking, and finally generates
+    a comprehensive candidate report.
     """
     print("Creating CodeCredX flow...")
 
-    # Initialize all nodes in the pipeline
+    # Initialize all nodes
     resume_input_node = ResumeInputNode()
     url_extraction_node = URLExtractionNode()
+    github_profile_fetcher_node = GitHubProfileFetcherNode()
+    url_consolidator_node = URLConsolidatorNode()
     github_analyzer_node = GitHubAnalyzerNode()
     llm_summarizer_node = LLMSummarizerNode()
     contribution_node = ContributionNode()
@@ -29,7 +32,9 @@ def create_codecredx_flow():
 
     # Define the sequence of nodes
     resume_input_node >> url_extraction_node
-    url_extraction_node >> github_analyzer_node
+    url_extraction_node >> github_profile_fetcher_node
+    github_profile_fetcher_node >> url_consolidator_node
+    url_consolidator_node >> github_analyzer_node
     github_analyzer_node >> llm_summarizer_node
     llm_summarizer_node >> contribution_node
     contribution_node >> originality_node
@@ -39,8 +44,7 @@ def create_codecredx_flow():
     elo_ranking_node >> report_generation_node
 
     # The flow starts with the ResumeInputNode
-    # This now effectively covers all core phases including integrated edge case handling.
     return Flow(start=resume_input_node)
 
-# Create an instance of the flow for direct import if needed
+# Create an instance of the flow for direct import
 codecredx_flow = create_codecredx_flow()
